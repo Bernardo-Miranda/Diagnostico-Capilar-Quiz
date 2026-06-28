@@ -217,6 +217,183 @@ $$;
 
 grant execute on function public.save_quiz_lead(jsonb) to anon;
 
+create or replace function public.get_quiz_leads_dashboard()
+returns jsonb
+language sql
+security definer
+set search_path = public
+as $$
+with
+base as (
+  select *
+  from public.quiz_leads
+),
+summary as (
+  select
+    count(*)::integer as total_leads,
+    count(*) filter (where status in ('respondendo', 'concluiu', 'checkout'))::integer as leads_iniciados,
+    count(*) filter (where status in ('concluiu', 'checkout'))::integer as leads_concluidos,
+    count(*) filter (where clicou_checkout = true)::integer as leads_checkout,
+    count(*) filter (where created_at >= date_trunc('day', now()))::integer as leads_hoje,
+    count(*) filter (where created_at >= now() - interval '7 days')::integer as leads_7_dias,
+    max(updated_at) as ultimo_evento
+  from base
+),
+rates as (
+  select
+    *,
+    case
+      when leads_iniciados = 0 then 0
+      else round((leads_concluidos::numeric / leads_iniciados::numeric) * 100, 1)
+    end as taxa_conclusao,
+    case
+      when leads_concluidos = 0 then 0
+      else round((leads_checkout::numeric / leads_concluidos::numeric) * 100, 1)
+    end as taxa_checkout
+  from summary
+),
+diagnosticos as (
+  select
+    coalesce(nullif(diagnostico, ''), 'Sem diagnóstico') as nome,
+    coalesce(nullif(nivel_risco, ''), 'Sem risco') as risco,
+    count(*)::integer as total
+  from base
+  group by 1, 2
+  order by total desc, nome asc
+),
+origens as (
+  select
+    coalesce(nullif(utm_source, ''), 'sem_utm') as origem,
+    coalesce(nullif(utm_campaign, ''), 'sem_campanha') as campanha,
+    count(*)::integer as total,
+    count(*) filter (where clicou_checkout = true)::integer as checkouts
+  from base
+  group by 1, 2
+  order by total desc
+  limit 20
+),
+status_funil as (
+  select
+    status as nome,
+    count(*)::integer as total
+  from base
+  group by 1
+  order by total desc
+),
+respostas as (
+  select 'Gênero' as pergunta, genero as resposta, count(*)::integer as total from base where genero is not null group by genero
+  union all
+  select 'Faixa etária', faixa_etaria, count(*)::integer from base where faixa_etaria is not null group by faixa_etaria
+  union all
+  select 'Tempo de queda', tempo_queda, count(*)::integer from base where tempo_queda is not null group by tempo_queda
+  union all
+  select 'Padrão da queda', padrao_queda, count(*)::integer from base where padrao_queda is not null group by padrao_queda
+  union all
+  select 'Fios por dia', fios_por_dia, count(*)::integer from base where fios_por_dia is not null group by fios_por_dia
+  union all
+  select 'Histórico familiar', historico_familiar, count(*)::integer from base where historico_familiar is not null group by historico_familiar
+  union all
+  select 'Eventos 12 meses', eventos_ultimos_12_meses, count(*)::integer from base where eventos_ultimos_12_meses is not null group by eventos_ultimos_12_meses
+  union all
+  select 'Química', frequencia_quimica, count(*)::integer from base where frequencia_quimica is not null group by frequencia_quimica
+  union all
+  select 'Sono/alimentação', rotina_sono_alimentacao, count(*)::integer from base where rotina_sono_alimentacao is not null group by rotina_sono_alimentacao
+  union all
+  select 'Tratamentos', tratamentos_tentados, count(*)::integer from base where tratamentos_tentados is not null group by tratamentos_tentados
+),
+respostas_top as (
+  select *
+  from respostas
+  order by pergunta asc, total desc
+),
+recentes as (
+  select
+    created_at,
+    updated_at,
+    status,
+    genero,
+    faixa_etaria,
+    tempo_queda,
+    padrao_queda,
+    fios_por_dia,
+    eventos_ultimos_12_meses,
+    diagnostico,
+    nivel_risco,
+    clicou_checkout,
+    coalesce(nullif(utm_source, ''), 'sem_utm') as utm_source,
+    coalesce(nullif(utm_campaign, ''), 'sem_campanha') as utm_campaign,
+    left(session_id, 8) as sessao
+  from base
+  order by updated_at desc
+  limit 80
+)
+select jsonb_build_object(
+  'generated_at', now(),
+  'summary', (
+    select jsonb_build_object(
+      'total_leads', total_leads,
+      'leads_iniciados', leads_iniciados,
+      'leads_concluidos', leads_concluidos,
+      'leads_checkout', leads_checkout,
+      'leads_hoje', leads_hoje,
+      'leads_7_dias', leads_7_dias,
+      'taxa_conclusao', taxa_conclusao,
+      'taxa_checkout', taxa_checkout,
+      'ultimo_evento', ultimo_evento
+    )
+    from rates
+  ),
+  'funil', (
+    select jsonb_build_array(
+      jsonb_build_object('nome', 'Iniciaram', 'total', leads_iniciados),
+      jsonb_build_object('nome', 'Concluíram', 'total', leads_concluidos),
+      jsonb_build_object('nome', 'Checkout', 'total', leads_checkout)
+    )
+    from rates
+  ),
+  'diagnosticos', coalesce((
+    select jsonb_agg(jsonb_build_object('nome', nome, 'risco', risco, 'total', total))
+    from diagnosticos
+  ), '[]'::jsonb),
+  'origens', coalesce((
+    select jsonb_agg(jsonb_build_object('origem', origem, 'campanha', campanha, 'total', total, 'checkouts', checkouts))
+    from origens
+  ), '[]'::jsonb),
+  'status_funil', coalesce((
+    select jsonb_agg(jsonb_build_object('nome', nome, 'total', total))
+    from status_funil
+  ), '[]'::jsonb),
+  'respostas_top', coalesce((
+    select jsonb_agg(jsonb_build_object('pergunta', pergunta, 'resposta', resposta, 'total', total))
+    from respostas_top
+  ), '[]'::jsonb),
+  'recentes', coalesce((
+    select jsonb_agg(jsonb_build_object(
+      'created_at', created_at,
+      'updated_at', updated_at,
+      'status', status,
+      'genero', genero,
+      'faixa_etaria', faixa_etaria,
+      'tempo_queda', tempo_queda,
+      'padrao_queda', padrao_queda,
+      'fios_por_dia', fios_por_dia,
+      'eventos_ultimos_12_meses', eventos_ultimos_12_meses,
+      'diagnostico', diagnostico,
+      'nivel_risco', nivel_risco,
+      'clicou_checkout', clicou_checkout,
+      'utm_source', utm_source,
+      'utm_campaign', utm_campaign,
+      'sessao', sessao
+    ))
+    from recentes
+  ), '[]'::jsonb)
+);
+$$;
+
+revoke all on function public.get_quiz_leads_dashboard() from public;
+revoke all on function public.get_quiz_leads_dashboard() from anon;
+grant execute on function public.get_quiz_leads_dashboard() to authenticated;
+
 -- Migração opcional:
 -- Se você já tinha dados na tabela antiga quiz_events, este bloco tenta organizar
 -- esses registros antigos dentro da nova tabela quiz_leads.

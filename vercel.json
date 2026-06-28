@@ -1,0 +1,24 @@
+{
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "dados.institutocapilar.site"
+        }
+      ],
+      "destination": "/painel"
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "painel.institutocapilar.site"
+        }
+      ],
+      "destination": "/painel"
+    }
+  ]
+}
