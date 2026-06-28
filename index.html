@@ -1923,8 +1923,19 @@
     var TOTAL_QUESTIONS = 10;
     var currentStep = 0;
     var answers = {};
+    var answerLabels = {};
     var quizStartedTracked = false;
     var quizCompletedTracked = false;
+    var leadStartedAt = null;
+    var leadCompletedAt = null;
+    var leadCheckoutAt = null;
+    var leadStatus = 'visitou';
+    var leadDiagnostic = null;
+    var leadRiskLevel = null;
+    var leadClickedCheckout = false;
+    var leadCheckoutCta = null;
+    var leadCheckoutLink = null;
+    var leadLastQuestion = null;
 
     var SUPABASE_URL = 'https://aqqhyeipxzbjdkgerxow.supabase.co';
     var SUPABASE_KEY = 'sb_publishable_vCMA8DWK6KuHFOOJ5NVbMQ_9OSEG2Q2';
@@ -1964,14 +1975,47 @@
       };
     }
 
-    function trackEvent(eventName, eventData) {
+    function saveLead(extraData) {
       if (!SUPABASE_URL || !SUPABASE_KEY || !window.fetch) return;
 
       var traffic = getTrafficParams();
+      var extra = extraData || {};
+      var now = new Date().toISOString();
+
+      if (extra.status) leadStatus = extra.status;
+      if (extra.iniciou_em) leadStartedAt = extra.iniciou_em;
+      if (extra.concluido_em) leadCompletedAt = extra.concluido_em;
+      if (extra.checkout_em) leadCheckoutAt = extra.checkout_em;
+      if (extra.diagnostico) leadDiagnostic = extra.diagnostico;
+      if (extra.nivel_risco) leadRiskLevel = extra.nivel_risco;
+      if (extra.clicou_checkout) leadClickedCheckout = true;
+      if (extra.checkout_cta) leadCheckoutCta = extra.checkout_cta;
+      if (extra.checkout_link) leadCheckoutLink = extra.checkout_link;
+      if (typeof extra.ultima_pergunta === 'number') leadLastQuestion = extra.ultima_pergunta;
+
       var payload = {
+        updated_at: now,
         session_id: sessionId,
-        event_name: eventName,
-        event_data: eventData || {},
+        status: leadStatus,
+        ultima_pergunta: leadLastQuestion,
+        iniciou_em: leadStartedAt,
+        concluido_em: leadCompletedAt,
+        checkout_em: leadCheckoutAt,
+        genero: answerLabels[1] || null,
+        faixa_etaria: answerLabels[2] || null,
+        tempo_queda: answerLabels[3] || null,
+        padrao_queda: answerLabels[4] || null,
+        fios_por_dia: answerLabels[5] || null,
+        historico_familiar: answerLabels[6] || null,
+        eventos_ultimos_12_meses: answerLabels[7] || null,
+        frequencia_quimica: answerLabels[8] || null,
+        rotina_sono_alimentacao: answerLabels[9] || null,
+        tratamentos_tentados: answerLabels[10] || null,
+        diagnostico: leadDiagnostic,
+        nivel_risco: leadRiskLevel,
+        clicou_checkout: leadClickedCheckout,
+        checkout_cta: leadCheckoutCta,
+        checkout_link: leadCheckoutLink,
         page_url: window.location.href,
         referrer: document.referrer || null,
         user_agent: navigator.userAgent || null,
@@ -1983,17 +2027,21 @@
         utm_content: traffic.utm_content,
         utm_term: traffic.utm_term,
         fbclid: traffic.fbclid,
-        gclid: traffic.gclid
+        gclid: traffic.gclid,
+        respostas_json: {
+          valores: answers,
+          textos: answerLabels
+        }
       };
 
       try {
-        fetch(SUPABASE_URL + '/rest/v1/quiz_events', {
+        fetch(SUPABASE_URL + '/rest/v1/quiz_leads?on_conflict=session_id', {
           method: 'POST',
           headers: {
             apikey: SUPABASE_KEY,
             Authorization: 'Bearer ' + SUPABASE_KEY,
             'Content-Type': 'application/json',
-            Prefer: 'return=minimal'
+            Prefer: 'resolution=merge-duplicates,return=minimal'
           },
           body: JSON.stringify(payload),
           keepalive: true
@@ -2011,10 +2059,20 @@
       return el ? el.textContent.trim() : btn.textContent.trim();
     }
 
+    function getSelectedLabels(q) {
+      return Array.prototype.slice.call(document.querySelectorAll('#step-' + q + ' .option.selected'))
+        .map(function(btn) { return getOptionLabel(btn); })
+        .join(', ');
+    }
+
     function trackQuizStarted(source) {
       if (quizStartedTracked) return;
       quizStartedTracked = true;
-      trackEvent('quiz_started', { source: source || 'unknown' });
+      saveLead({
+        status: 'iniciou',
+        iniciou_em: new Date().toISOString(),
+        ultima_pergunta: source === 'first_answer' ? 1 : null
+      });
     }
 
     var startButton = document.querySelector('.btn-primary');
@@ -2057,7 +2115,9 @@
       btn.addEventListener('click', function() {
         var q = parseInt(btn.dataset.q, 10);
         var value = btn.dataset.value;
+        var label = getOptionLabel(btn);
         answers[q] = value;
+        answerLabels[q] = label;
         trackQuizStarted('first_answer');
 
         // feedback visual
@@ -2065,11 +2125,9 @@
         siblings.forEach(function(s) { s.classList.remove('selected'); });
         btn.classList.add('selected');
 
-        trackEvent('question_answered', {
-          question_number: q,
-          question_text: getQuestionText(q),
-          answer_value: value,
-          answer_label: getOptionLabel(btn)
+        saveLead({
+          status: 'respondendo',
+          ultima_pergunta: q
         });
 
         // avança automaticamente após pequeno delay (feedback visual)
@@ -2106,27 +2164,29 @@
         }
 
         step7Next.disabled = (answers[7].length === 0);
+        answerLabels[7] = getSelectedLabels(7);
       });
     });
 
     // ───── Loader animado (Step 11) ─────
     if (step7Next) {
       step7Next.addEventListener('click', function() {
-        trackEvent('question_answered', {
-          question_number: 7,
-          question_text: getQuestionText(7),
-          answer_value: answers[7] || [],
-          answer_label: (answers[7] || []).join(', ')
+        answerLabels[7] = getSelectedLabels(7);
+        saveLead({
+          status: 'respondendo',
+          ultima_pergunta: 7
         });
       });
     }
 
     document.querySelectorAll('[data-cta]').forEach(function(link) {
       link.addEventListener('click', function() {
-        trackEvent('checkout_clicked', {
-          cta: link.dataset.cta || null,
-          href: link.href || null,
-          text: link.textContent.trim()
+        saveLead({
+          status: 'checkout',
+          checkout_em: new Date().toISOString(),
+          clicou_checkout: true,
+          checkout_cta: link.dataset.cta || null,
+          checkout_link: link.href || null
         });
       });
     });
@@ -2200,10 +2260,12 @@
 
       if (!quizCompletedTracked) {
         quizCompletedTracked = true;
-        trackEvent('quiz_completed', {
-          result_title: d.title,
-          risk_level: d.risk,
-          answers_snapshot: answers
+        saveLead({
+          status: 'concluiu',
+          concluido_em: new Date().toISOString(),
+          diagnostico: d.title,
+          nivel_risco: d.risk,
+          ultima_pergunta: TOTAL_QUESTIONS
         });
       }
     }
