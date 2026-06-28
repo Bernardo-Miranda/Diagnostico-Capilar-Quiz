@@ -1,0 +1,2095 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#6b4423">
+  <title>Diagnóstico Capilar — Descubra a causa da sua queda em 60 segundos</title>
+
+  <!-- META PIXEL AQUI (cole o snippet do Facebook Pixel antes do deploy em FB Ads) -->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brown: #6b4423;
+      --brown-dark: #4a2d15;
+      --gold: #d4a24a;
+      --gold-light: #e8c077;
+      --gold-dark: #a07a2d;
+      --cream: #faf6f1;
+      --cream-dark: #f0e8dc;
+      --dark: #2d1810;
+      --text: #3a2817;
+      --text-muted: #7a6855;
+      --success: #4caf50;
+      --danger: #d9534f;
+      --white: #ffffff;
+      --shadow-sm: 0 2px 6px rgba(75, 45, 21, 0.08);
+      --shadow-md: 0 4px 16px rgba(75, 45, 21, 0.12);
+      --shadow-lg: 0 8px 32px rgba(75, 45, 21, 0.18);
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: var(--cream);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    img { max-width: 100%; display: block; }
+    button { font-family: inherit; cursor: pointer; border: none; background: none; }
+
+    /* ──────────── BARRA DE PROGRESSO FIXA ──────────── */
+    .quiz-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--cream-dark);
+      z-index: 100;
+      transition: opacity 0.3s;
+    }
+    .quiz-progress.hidden { opacity: 0; pointer-events: none; }
+    .quiz-progress__fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--gold-dark), var(--gold));
+      transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .quiz-counter {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: var(--white);
+      border: 1px solid var(--cream-dark);
+      border-radius: 999px;
+      padding: 0.375rem 0.875rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--brown);
+      z-index: 100;
+      box-shadow: var(--shadow-sm);
+      transition: opacity 0.3s;
+    }
+    .quiz-counter.hidden { opacity: 0; pointer-events: none; }
+
+    /* ──────────── STEPS ──────────── */
+    .step {
+      display: none;
+      min-height: 100vh;
+      padding: 3.5rem 1.25rem 2rem;
+      animation: fadeIn 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .step.active { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .step__container {
+      max-width: 640px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* ──────────── INTRO (Step 0) ──────────── */
+    .intro {
+      text-align: center;
+      padding-top: 2rem;
+    }
+    .intro__badge {
+      display: inline-block;
+      background: var(--gold);
+      color: var(--dark);
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 0.375rem 0.875rem;
+      border-radius: 999px;
+      margin-bottom: 1.5rem;
+    }
+    .intro__title {
+      font-size: clamp(1.75rem, 5.5vw, 2.5rem);
+      font-weight: 800;
+      color: var(--brown-dark);
+      line-height: 1.2;
+      margin-bottom: 1rem;
+    }
+    .intro__title em {
+      font-style: normal;
+      color: var(--gold-dark);
+      display: inline-block;
+      border-bottom: 3px solid var(--gold);
+    }
+    .intro__subtitle {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      max-width: 520px;
+      margin: 0 auto 2rem;
+      line-height: 1.6;
+    }
+    .intro__hero-img {
+      width: 180px;
+      height: 180px;
+      margin: 0 auto 2rem;
+      background: linear-gradient(135deg, var(--cream-dark), var(--cream));
+      border: 4px solid var(--gold);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 5rem;
+      box-shadow: var(--shadow-lg);
+    }
+    .intro__meta {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+    .intro__meta-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .intro__meta-item::before {
+      content: '✓';
+      width: 1.1rem;
+      height: 1.1rem;
+      background: var(--success);
+      color: white;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 900;
+    }
+
+    /* ──────────── BOTÃO PRIMÁRIO ──────────── */
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+      max-width: 420px;
+      background: linear-gradient(180deg, var(--gold), var(--gold-dark));
+      color: var(--dark);
+      font-size: 1.1rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 1.1rem 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 6px 18px rgba(212, 162, 74, 0.4);
+      transition: transform 0.15s, box-shadow 0.15s;
+      text-decoration: none;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(212, 162, 74, 0.55);
+    }
+    .btn-primary:active { transform: translateY(0); }
+
+    /* ──────────── QUESTION HEADER ──────────── */
+    .question__number {
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: var(--gold-dark);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+    .question__title {
+      font-size: clamp(1.4rem, 4.5vw, 1.8rem);
+      font-weight: 800;
+      color: var(--brown-dark);
+      text-align: center;
+      line-height: 1.3;
+      margin-bottom: 0.5rem;
+    }
+    .question__hint {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      text-align: center;
+      margin-bottom: 1.75rem;
+    }
+
+    /* ──────────── OPTION CARDS ──────────── */
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      width: 100%;
+    }
+    .options.grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .option {
+      display: flex;
+      align-items: center;
+      gap: 0.875rem;
+      width: 100%;
+      background: var(--white);
+      border: 2px solid var(--cream-dark);
+      border-radius: 14px;
+      padding: 1rem 1.125rem;
+      text-align: left;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+      transition: all 0.2s;
+      position: relative;
+    }
+    .option:hover {
+      border-color: var(--gold);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+    .option.selected {
+      border-color: var(--gold);
+      background: linear-gradient(90deg, rgba(212, 162, 74, 0.1), rgba(212, 162, 74, 0.02));
+    }
+    .option.selected::after {
+      content: '✓';
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 1.5rem;
+      height: 1.5rem;
+      background: var(--gold);
+      color: var(--dark);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 900;
+    }
+    .option__icon {
+      font-size: 1.75rem;
+      flex-shrink: 0;
+    }
+    .option__text {
+      flex: 1;
+      line-height: 1.4;
+    }
+
+    .options.grid-2 .option {
+      flex-direction: column;
+      text-align: center;
+      padding: 1.25rem 1rem;
+      gap: 0.5rem;
+    }
+    .options.grid-2 .option__icon { font-size: 2.5rem; }
+    .options.grid-2 .option.selected::after {
+      right: 0.5rem;
+      top: 0.5rem;
+      transform: none;
+    }
+
+    /* ──────────── NAVIGATION ──────────── */
+    .step__nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1.5rem;
+      gap: 1rem;
+    }
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.875rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      transition: background 0.15s;
+    }
+    .btn-back:hover { background: var(--cream-dark); }
+    .btn-next {
+      margin-left: auto;
+      background: var(--brown);
+      color: var(--white);
+      font-weight: 700;
+      font-size: 0.95rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: 10px;
+      transition: background 0.15s;
+    }
+    .btn-next:hover:not(:disabled) { background: var(--brown-dark); }
+    .btn-next:disabled {
+      background: var(--cream-dark);
+      color: var(--text-muted);
+      cursor: not-allowed;
+    }
+
+    /* ──────────── LOADER (Step 11) ──────────── */
+    .loader {
+      text-align: center;
+      padding-top: 3rem;
+    }
+    .loader__spinner {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 2rem;
+      border: 6px solid var(--cream-dark);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .loader__title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--brown-dark);
+      margin-bottom: 0.5rem;
+    }
+    .loader__subtitle {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+    }
+    .loader__steps {
+      max-width: 320px;
+      margin: 0 auto;
+      text-align: left;
+    }
+    .loader__step {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      padding: 0.5rem 0;
+      opacity: 0.4;
+      transition: opacity 0.3s, color 0.3s;
+    }
+    .loader__step.done { opacity: 1; color: var(--text); }
+    .loader__step.done::before {
+      content: '✓';
+      background: var(--success);
+      color: white;
+    }
+    .loader__step::before {
+      content: '○';
+      width: 1.25rem;
+      height: 1.25rem;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 900;
+      background: var(--cream-dark);
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       STEP 12 — PÁGINA DE VENDA
+       ════════════════════════════════════════════════════════════ */
+    .sales { padding: 0; min-height: auto; }
+    .sales .step__container { max-width: 100%; }
+    .sales-wrap { max-width: 760px; margin: 0 auto; padding: 0 1.25rem; }
+
+    /* ─── Barra estilo portal de saúde ─── */
+    .portal-top {
+      background: #ffffff;
+      border-top: 3px solid #333333;
+      border-bottom: 1px solid #eeeeee;
+    }
+    .portal-top__inner,
+    .portal-main__inner {
+      width: min(100%, 1340px);
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+    .portal-top__inner {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      min-height: 48px;
+      overflow-x: auto;
+      white-space: nowrap;
+      scrollbar-width: none;
+    }
+    .portal-top__inner::-webkit-scrollbar { display: none; }
+    .portal-top__link {
+      color: #356ad8;
+      font-size: 0.9rem;
+      font-weight: 800;
+      text-decoration: none;
+    }
+    .portal-top__link:nth-child(2) { color: #d71919; }
+    .portal-top__link:nth-child(3) { color: #1a9f45; }
+    .portal-top__link:nth-child(4) { color: #f06a00; }
+    .portal-top__link:nth-child(5) { color: #d80b33; }
+    .portal-top__link:nth-child(6) { color: #111111; }
+    .portal-top__link:nth-child(7) { color: #1b5ebd; }
+    .portal-top__link:nth-child(8) { color: #00856f; }
+    .portal-main {
+      background: #c9140f;
+      color: #ffffff;
+    }
+    .portal-main__inner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 72px;
+    }
+    .portal-main__left {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+    }
+    .portal-main__brand {
+      color: #ffffff;
+      font-size: 2rem;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -0.08em;
+      text-transform: lowercase;
+    }
+
+    /* ─── Hero de alerta ─── */
+    .alert-hero {
+      background: linear-gradient(135deg, #8b2e2e 0%, #d9534f 100%);
+      color: white;
+      padding: 2.5rem 1.25rem;
+      text-align: center;
+      border-bottom: 4px solid var(--gold);
+    }
+    .alert-hero__badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      background: rgba(255,255,255,0.2);
+      color: white;
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 0.375rem 0.875rem;
+      border-radius: 999px;
+      margin-bottom: 1rem;
+    }
+    .alert-hero__title {
+      font-size: clamp(1.5rem, 5.5vw, 2.2rem);
+      font-weight: 900;
+      line-height: 1.2;
+      margin-bottom: 0.75rem;
+      text-transform: uppercase;
+    }
+    .alert-hero__diagnosis {
+      font-size: 1.05rem;
+      font-weight: 600;
+      max-width: 600px;
+      margin: 0 auto 1.5rem;
+      line-height: 1.5;
+    }
+    .alert-hero__stats {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(255,255,255,0.2);
+    }
+    .alert-hero__stat { text-align: center; }
+    .alert-hero__stat-num { font-size: 1.75rem; font-weight: 900; display: block; }
+    .alert-hero__stat-lbl { font-size: 0.72rem; text-transform: uppercase; opacity: 0.85; letter-spacing: 0.08em; }
+
+    /* ─── Seções ─── */
+    .section { padding: 3rem 0; }
+    .section__kicker {
+      display: inline-block;
+      background: var(--gold);
+      color: var(--dark);
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 0.375rem 0.75rem;
+      border-radius: 999px;
+      margin-bottom: 0.75rem;
+    }
+    .section__title {
+      font-size: clamp(1.4rem, 4.5vw, 2rem);
+      font-weight: 800;
+      color: var(--brown-dark);
+      line-height: 1.25;
+      margin-bottom: 1rem;
+    }
+    .section__text {
+      font-size: 1rem;
+      color: var(--text);
+      line-height: 1.7;
+      margin-bottom: 1rem;
+    }
+
+    /* ─── Product Card ─── */
+    .product {
+      background: var(--white);
+      border: 2px solid var(--cream-dark);
+      border-radius: 20px;
+      padding: 2rem 1.5rem;
+      box-shadow: var(--shadow-md);
+      text-align: center;
+    }
+    .product__image {
+      width: 260px;
+      height: 260px;
+      margin: 0 auto 1.5rem;
+      background: var(--cream);
+      border: 1px solid var(--cream-dark);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      position: relative;
+    }
+    .product__image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .product__name {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--brown-dark);
+      margin-bottom: 0.5rem;
+    }
+    .product__subtitle {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+    .product__features {
+      display: flex;
+      flex-direction: column;
+      gap: 0.625rem;
+      text-align: left;
+      max-width: 440px;
+      margin: 0 auto 1.5rem;
+    }
+    .product__feature {
+      display: flex;
+      gap: 0.625rem;
+      font-size: 0.92rem;
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .product__feature::before {
+      content: '✓';
+      width: 1.25rem;
+      height: 1.25rem;
+      background: var(--success);
+      color: white;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 900;
+      flex-shrink: 0;
+      margin-top: 0.1rem;
+    }
+
+    /* ─── Oferta ─── */
+    .offer {
+      background: linear-gradient(135deg, var(--brown-dark), var(--brown));
+      color: white;
+      border-radius: 20px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      border: 3px solid var(--gold);
+      box-shadow: var(--shadow-lg);
+    }
+    .offer__label {
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--gold-light);
+      margin-bottom: 0.5rem;
+    }
+    .offer__price-wrap {
+      margin: 1rem 0 1.5rem;
+    }
+    .offer__price-old {
+      text-decoration: line-through;
+      color: var(--gold-light);
+      opacity: 0.7;
+      font-size: 1rem;
+      font-weight: 500;
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+    .offer__price {
+      font-size: clamp(2.5rem, 8vw, 3.5rem);
+      font-weight: 900;
+      color: var(--gold);
+      line-height: 1;
+      display: flex;
+      justify-content: center;
+      align-items: baseline;
+      gap: 0.25rem;
+    }
+    .offer__price-currency { font-size: 0.5em; font-weight: 600; }
+    .offer__price-cents { font-size: 0.5em; font-weight: 600; }
+    .offer__price-note {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--gold-light);
+      margin-top: 0.5rem;
+      font-weight: 600;
+    }
+    .offer__cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+      max-width: 420px;
+      background: linear-gradient(180deg, #5ccf61, #47a94b);
+      color: white;
+      font-size: 1.05rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 1.1rem 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(92, 207, 97, 0.4);
+      transition: transform 0.15s, box-shadow 0.15s;
+      text-decoration: none;
+      animation: pulse-cta 2.2s ease-in-out infinite;
+    }
+    @keyframes pulse-cta {
+      0%, 100% { box-shadow: 0 6px 20px rgba(92, 207, 97, 0.4); }
+      50% { box-shadow: 0 6px 32px rgba(92, 207, 97, 0.7); }
+    }
+    .offer__cta:hover {
+      transform: translateY(-2px);
+      animation: none;
+    }
+    .offer__secure {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.375rem;
+      margin-top: 1rem;
+      font-size: 0.75rem;
+      color: var(--gold-light);
+      opacity: 0.85;
+    }
+
+    /* ─── Countdown ─── */
+    .countdown {
+      background: var(--cream-dark);
+      border: 2px dashed var(--gold-dark);
+      border-radius: 12px;
+      padding: 1rem;
+      margin: 1.5rem 0;
+      text-align: center;
+    }
+    .countdown__label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--brown-dark);
+      margin-bottom: 0.5rem;
+    }
+    .countdown__timer {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+    }
+    .countdown__box {
+      background: var(--brown-dark);
+      color: var(--gold);
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      min-width: 48px;
+      font-size: 1.25rem;
+    }
+
+    /* ─── Depoimentos ─── */
+    .testimonials {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: 1fr;
+    }
+    .testimonial {
+      background: var(--white);
+      border: 1px solid var(--cream-dark);
+      border-radius: 14px;
+      padding: 1.25rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .testimonial__head {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    .testimonial__avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      overflow: hidden;
+      flex-shrink: 0;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      border: 2px solid var(--white);
+      box-shadow: var(--shadow-sm);
+    }
+    .testimonial__avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .testimonial__name { font-weight: 700; color: var(--brown-dark); font-size: 0.95rem; }
+    .testimonial__stars { color: var(--gold); font-size: 0.85rem; letter-spacing: 0.1em; }
+    .testimonial__text {
+      font-size: 0.92rem;
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ─── Garantia ─── */
+    .guarantee {
+      background: linear-gradient(135deg, var(--cream), var(--cream-dark));
+      border: 2px solid var(--gold);
+      border-radius: 20px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+    }
+    .guarantee__seal {
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 1rem;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      color: var(--dark);
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      box-shadow: var(--shadow-md);
+      border: 4px solid var(--white);
+    }
+    .guarantee__seal-num { font-size: 2rem; line-height: 1; }
+    .guarantee__seal-lbl { font-size: 0.62rem; letter-spacing: 0.05em; }
+    .guarantee__title { font-size: 1.3rem; font-weight: 800; color: var(--brown-dark); margin-bottom: 0.5rem; }
+    .guarantee__text { font-size: 0.95rem; color: var(--text); line-height: 1.6; }
+
+    /* ─── FAQ ─── */
+    .faq__item {
+      background: var(--white);
+      border: 1px solid var(--cream-dark);
+      border-radius: 12px;
+      margin-bottom: 0.75rem;
+      overflow: hidden;
+    }
+    .faq__question {
+      width: 100%;
+      padding: 1rem 1.25rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--brown-dark);
+      text-align: left;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+    .faq__question::after {
+      content: '+';
+      font-size: 1.5rem;
+      font-weight: 500;
+      color: var(--gold-dark);
+      transition: transform 0.25s;
+      flex-shrink: 0;
+    }
+    .faq__item.open .faq__question::after { transform: rotate(45deg); }
+    .faq__answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      padding: 0 1.25rem;
+      font-size: 0.92rem;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .faq__item.open .faq__answer {
+      max-height: 400px;
+      padding-bottom: 1rem;
+    }
+
+    /* ─── Footer ─── */
+    footer {
+      background: var(--brown-dark);
+      color: rgba(255,255,255,0.7);
+      padding: 2rem 1.25rem;
+      text-align: center;
+      font-size: 0.75rem;
+      line-height: 1.8;
+      margin-top: 3rem;
+    }
+    footer a { color: rgba(255,255,255,0.9); text-decoration: underline; }
+    footer a:hover { color: var(--gold); }
+    footer .footer__links a { margin: 0 0.375rem; }
+    footer .footer__disclaimer {
+      max-width: 620px;
+      margin: 1rem auto 0;
+      font-size: 0.65rem;
+      opacity: 0.6;
+      line-height: 1.7;
+    }
+
+    /* ─── Responsivo ─── */
+    @media (min-width: 640px) {
+      .testimonials { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 760px) {
+      .portal-main__inner {
+        min-height: 70px;
+      }
+      .portal-main__brand { font-size: 1.85rem; }
+    }
+    @media (max-width: 420px) {
+      .portal-top__inner {
+        min-height: 42px;
+        gap: 0.85rem;
+        padding: 0 1rem;
+      }
+      .portal-top__link { font-size: 0.78rem; }
+      .portal-main__inner {
+        min-height: 62px;
+        padding: 0 1rem;
+      }
+      .portal-main__left { justify-content: center; }
+      .portal-main__brand { font-size: 1.7rem; }
+      .alert-hero__stats { gap: 1rem; }
+      .alert-hero__stat-num { font-size: 1.4rem; }
+      .countdown__box { min-width: 42px; font-size: 1.1rem; padding: 0.4rem 0.55rem; }
+      .product__image { width: 200px; height: 200px; }
+    }
+
+    /* ─── Seção DOR ─── */
+    .pain {
+      background: linear-gradient(180deg, #fef3f3 0%, #fde8e8 100%);
+      border-left: 5px solid #d9534f;
+      border-radius: 16px;
+      padding: 2rem 1.5rem;
+      margin: 1.5rem 0;
+    }
+    .pain__title {
+      font-size: clamp(1.3rem, 4.5vw, 1.7rem);
+      font-weight: 800;
+      color: #8b2e2e;
+      line-height: 1.3;
+      margin-bottom: 1.25rem;
+      text-align: center;
+    }
+    .pain__intro {
+      font-size: 1rem;
+      color: var(--text);
+      line-height: 1.7;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .pain__list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.875rem;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+    .pain__item {
+      display: flex;
+      gap: 0.875rem;
+      align-items: flex-start;
+      background: var(--white);
+      padding: 1rem 1.125rem;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      color: var(--text);
+      line-height: 1.55;
+      box-shadow: var(--shadow-sm);
+      font-weight: 500;
+    }
+    .pain__item::before {
+      content: '😔';
+      font-size: 1.4rem;
+      flex-shrink: 0;
+      line-height: 1;
+      margin-top: 0.1rem;
+    }
+    .pain__outro {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #8b2e2e;
+      text-align: center;
+      margin-top: 1.5rem;
+      line-height: 1.5;
+      font-style: italic;
+    }
+
+    /* ─── Seção AGRAVAMENTO / STAKES ─── */
+    .stakes {
+      background: linear-gradient(180deg, #2d1810 0%, #1a0e08 100%);
+      color: #f0e8dc;
+      border-radius: 20px;
+      padding: 2.5rem 1.5rem;
+      margin: 2rem 0;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+    .stakes::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #8b2e2e, #d9534f, #8b2e2e);
+    }
+    .stakes__kicker {
+      display: inline-block;
+      background: #8b2e2e;
+      color: white;
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 0.375rem 0.875rem;
+      border-radius: 999px;
+      margin-bottom: 1rem;
+    }
+    .stakes__title {
+      font-size: clamp(1.4rem, 5vw, 2rem);
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.25;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+    }
+    .stakes__title em {
+      font-style: normal;
+      color: #f5a5a5;
+    }
+    .stakes__intro {
+      font-size: 1rem;
+      color: rgba(255,255,255,0.85);
+      line-height: 1.7;
+      margin-bottom: 1.5rem;
+    }
+    .stakes__list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+    .stakes__item {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+      background: rgba(217, 83, 79, 0.12);
+      border: 1px solid rgba(217, 83, 79, 0.25);
+      padding: 0.875rem 1rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      color: #f0e8dc;
+      line-height: 1.55;
+    }
+    .stakes__item::before {
+      content: '⚠';
+      color: #f5a5a5;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      line-height: 1.3;
+      font-weight: 900;
+    }
+    .stakes__turn {
+      text-align: center;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(255,255,255,0.15);
+    }
+    .stakes__turn-text {
+      font-size: 1rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.9);
+      line-height: 1.6;
+      margin-bottom: 0.25rem;
+    }
+    .stakes__turn-highlight {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--gold);
+      line-height: 1.5;
+    }
+
+    /* ─── Seção VALUE STACK ─── */
+    .stack {
+      background: var(--white);
+      border: 2px solid var(--gold);
+      border-radius: 20px;
+      padding: 2rem 1.5rem;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      overflow: hidden;
+    }
+    .stack::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, var(--gold-dark), var(--gold), var(--gold-light), var(--gold), var(--gold-dark));
+    }
+    .stack__title {
+      font-size: clamp(1.3rem, 4.5vw, 1.6rem);
+      font-weight: 800;
+      color: var(--brown-dark);
+      text-align: center;
+      margin-bottom: 1.5rem;
+      line-height: 1.3;
+    }
+    .stack__list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .stack__row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px dashed var(--cream-dark);
+    }
+    .stack__row:last-child { border-bottom: none; }
+    .stack__row-text {
+      display: flex;
+      gap: 0.5rem;
+      align-items: flex-start;
+      flex: 1;
+      font-size: 0.92rem;
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .stack__row-text::before {
+      content: '✓';
+      width: 1.2rem;
+      height: 1.2rem;
+      background: var(--success);
+      color: white;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      font-weight: 900;
+      flex-shrink: 0;
+      margin-top: 0.15rem;
+    }
+    .stack__row-price {
+      font-weight: 700;
+      color: var(--brown-dark);
+      white-space: nowrap;
+      font-size: 0.95rem;
+    }
+    .stack__row-price.free {
+      color: var(--success);
+      font-weight: 800;
+    }
+    .stack__total {
+      margin-top: 1rem;
+      padding: 1rem 1.25rem;
+      background: var(--cream-dark);
+      border-radius: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .stack__total-lbl {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .stack__total-val {
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: var(--brown-dark);
+      text-decoration: line-through;
+      text-decoration-thickness: 2px;
+      text-decoration-color: var(--danger);
+    }
+    .stack__today {
+      margin-top: 1rem;
+      padding: 1.25rem 1rem;
+      background: linear-gradient(135deg, var(--brown-dark), var(--brown));
+      border-radius: 12px;
+      text-align: center;
+      color: white;
+      border: 2px solid var(--gold);
+    }
+    .stack__today-lbl {
+      font-size: 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--gold-light);
+      margin-bottom: 0.375rem;
+    }
+    .stack__today-val {
+      font-size: clamp(2rem, 6vw, 2.75rem);
+      font-weight: 900;
+      color: var(--gold);
+      line-height: 1;
+    }
+    .stack__today-val small { font-size: 0.45em; font-weight: 600; }
+    .stack__today-note {
+      display: block;
+      margin-top: 0.375rem;
+      font-size: 0.78rem;
+      color: var(--gold-light);
+      font-weight: 600;
+    }
+
+    /* ─── Seção 2 CAMINHOS ─── */
+    .paths {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    @media (min-width: 720px) {
+      .paths { grid-template-columns: 1fr 1fr; }
+    }
+    .path {
+      border-radius: 18px;
+      padding: 1.75rem 1.25rem;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .path--win {
+      background: linear-gradient(135deg, #faf6f1 0%, #f0e8dc 100%);
+      border: 2px solid var(--gold);
+      box-shadow: var(--shadow-md);
+    }
+    .path--lose {
+      background: linear-gradient(135deg, #2d1810 0%, #1a0e08 100%);
+      border: 2px solid #5a2020;
+      color: #c9b8a6;
+    }
+    .path__icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.75rem;
+      font-weight: 900;
+      margin-bottom: 1rem;
+    }
+    .path--win .path__icon {
+      background: var(--success);
+      color: white;
+    }
+    .path--lose .path__icon {
+      background: #8b2e2e;
+      color: white;
+    }
+    .path__kicker {
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+    }
+    .path--win .path__kicker { color: var(--success); }
+    .path--lose .path__kicker { color: #f5a5a5; }
+    .path__title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      line-height: 1.3;
+      margin-bottom: 1rem;
+    }
+    .path--win .path__title { color: var(--brown-dark); }
+    .path--lose .path__title { color: #fff; }
+    .path__list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.625rem;
+      flex: 1;
+    }
+    .path__item {
+      display: flex;
+      gap: 0.625rem;
+      align-items: flex-start;
+      font-size: 0.92rem;
+      line-height: 1.55;
+    }
+    .path--win .path__item { color: var(--text); }
+    .path--lose .path__item { color: #c9b8a6; }
+    .path--win .path__item::before {
+      content: '→';
+      color: var(--success);
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+    .path--lose .path__item::before {
+      content: '✗';
+      color: #d9534f;
+      font-weight: 900;
+      flex-shrink: 0;
+      font-size: 0.95rem;
+    }
+    .path__cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      background: linear-gradient(180deg, #5ccf61, #47a94b);
+      color: white;
+      font-size: 0.92rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 0.875rem 1rem;
+      border-radius: 10px;
+      text-decoration: none;
+      letter-spacing: 0.04em;
+      transition: transform 0.15s;
+    }
+    .path__cta:hover { transform: translateY(-2px); }
+    .path__warning {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #f5a5a5;
+      font-style: italic;
+      text-align: center;
+      padding: 0.75rem;
+      border: 1px dashed rgba(245, 165, 165, 0.4);
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de progresso fixa -->
+  <div class="quiz-progress hidden" id="quizProgress">
+    <div class="quiz-progress__fill" id="quizProgressFill"></div>
+  </div>
+  <div class="quiz-counter hidden" id="quizCounter">Pergunta 1 de 10</div>
+
+  <!-- ══════════════════ STEP 0 - INTRO ══════════════════ -->
+  <section class="step active" id="step-0">
+    <div class="step__container intro">
+      <span class="intro__badge">Diagnóstico Capilar Gratuito</span>
+      <div class="intro__hero-img">💇‍♀️</div>
+      <h1 class="intro__title">Descubra em <em>60 segundos</em> a causa real da sua queda de cabelo</h1>
+      <p class="intro__subtitle">Responda 10 perguntas rápidas e receba um diagnóstico personalizado do seu perfil capilar e o protocolo ideal para reverter a queda.</p>
+      <div class="intro__meta">
+        <span class="intro__meta-item">Rápido (60s)</span>
+        <span class="intro__meta-item">100% gratuito</span>
+        <span class="intro__meta-item">Personalizado</span>
+      </div>
+      <button class="btn-primary" onclick="goToStep(1)">
+        Começar meu diagnóstico →
+      </button>
+    </div>
+  </section>
+
+  <!-- ══════════════════ STEP 1 ══════════════════ -->
+  <section class="step" id="step-1">
+    <div class="step__container">
+      <p class="question__number">Pergunta 1 de 10</p>
+      <h2 class="question__title">Qual é o seu gênero?</h2>
+      <p class="question__hint">Isso ajuda a personalizar seu diagnóstico.</p>
+      <div class="options grid-2">
+        <button class="option" data-q="1" data-value="female">
+          <span class="option__icon">👩</span>
+          <span class="option__text">Mulher</span>
+        </button>
+        <button class="option" data-q="1" data-value="male">
+          <span class="option__icon">👨</span>
+          <span class="option__text">Homem</span>
+        </button>
+      </div>
+      <div class="step__nav">
+        <button class="btn-back" onclick="goToStep(0)">← Voltar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════ STEP 2 ══════════════════ -->
+  <section class="step" id="step-2">
+    <div class="step__container">
+      <p class="question__number">Pergunta 2 de 10</p>
+      <h2 class="question__title">Qual é a sua faixa etária?</h2>
+      <div class="options grid-2">
+        <button class="option" data-q="2" data-value="18-29"><span class="option__icon">🌱</span><span class="option__text">18 a 29 anos</span></button>
+        <button class="option" data-q="2" data-value="30-39"><span class="option__icon">🌿</span><span class="option__text">30 a 39 anos</span></button>
+        <button class="option" data-q="2" data-value="40-49"><span class="option__icon">🌳</span><span class="option__text">40 a 49 anos</span></button>
+        <button class="option" data-q="2" data-value="50+"><span class="option__icon">🌲</span><span class="option__text">50 anos ou mais</span></button>
+      </div>
+      <div class="step__nav">
+        <button class="btn-back" onclick="goToStep(1)">← Voltar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════ STEP 3 ══════════════════ -->
+  <section class="step" id="step-3">
+    <div class="step__container">
+      <p class="question__number">Pergunta 3 de 10</p>
+      <h2 class="question__title">Há quanto tempo você nota a queda de cabelo?</h2>
+      <div class="options">
+        <button class="option" data-q="3" data-value="&lt;3m"><span class="option__icon">⏱️</span><span class="option__text">Menos de 3 meses</span></button>
+        <button class="option" data-q="3" data-value="3-6m"><span class="option__icon">📅</span><span class="option__text">Entre 3 e 6 meses</span></button>
+        <button class="option" data-q="3" data-value="6-12m"><span class="option__icon">🗓️</span><span class="option__text">Entre 6 meses e 1 ano</span></button>
+        <button class="option" data-q="3" data-value="&gt;1y"><span class="option__icon">⌛</span><span class="option__text">Mais de 1 ano</span></button>
+      </div>
+      <div class="step__nav">
+        <button class="btn-back" onclick="goToStep(2)">← Voltar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════ STEP 4 ══════════════════ -->
+  <section class="step" id="step-4">
+    <div class="step__container">
+      <p class="question__number">Pergunta 4 de 10</p>
+      <h2 class="question__title">Como você descreve o padrão da sua queda?</h2>
+      <p class="question__hint">Escolha a opção que mais se parece com o seu caso.</p>
+      <div class="options">
+        <button class="option" data-q="4" data-value="diffuse"><span class="option__icon">🌐</span><span class="option__text">Difusa, por todo o couro cabeludo</span></button>
+        <button class="option" data-q="4" data-value="crown"><span class="option__icon">⭕</span><span class="option__text">Coroa / topo da cabeça afinando</span></button>
+        <button class="option" data-q="4" data-value="frontal"><span class="option__icon">📏</span><span class="option__text">Entradas / linha frontal recuando</span></button>
+        <button class="option" data-q="4" data-value="patches"><span class="option__icon">🎯</span><span class="option__text">Falhas circulares específicas</span></button>
+      </div>
+      <div class="step__nav">
+        <button class="btn-back" onclick="goToStep(3)">← Voltar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════ STEP 5 ══════════════════ -->
+  <section class="step" id="step-5">
+    <div class="step__container">
+      <p class="question__number">Pergunta 5 de 10</p>
+      <h2 class="question__title">Quantos fios você perde por dia em média?</h2>
+      <p class="question__hint">Observe no travesseiro, no banho e na escova.</p>
+      <div class="options">
+        <button class="option" data-q="5" data-value="&lt;50"><span class="option__icon">🟢</span><span class="option__text">Até 50 fios</span></button>
+        <button class="option" data-q="5" data-value="50-100"><span class="option__icon">🟡</span><span class="option__text">Entre 50 e 100 fios</span></button>
+        <button class="option" data-q="5" data-value="100-200"><span class="option__icon">🟠</span><span class="option__text">Entre 100 e 200 fios</span></button>
+        <button class="option" data-q="5" data-value="&gt;200"><span class="option__icon">🔴</span><span class="option__text">Mais de 200 fios (muitos)</span></button>
+      </div>
+      <div class="step__nav">
+        <button class="btn-back" onclick="goToStep(4)">← Voltar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════ STEP 6 ══════════════════ -->
+  <section class="step" id="step-6">
+    <div class="step__container">
+      <p class="question__number">Pergunta 6 de 10</p>
+      <h2 class="question__title">Alguém na sua família tem ou teve calvície?</h2>
+      <div class="options">
+        <button class="option" data-q="6" data-value="parents"><span class="option__icon">👨‍👩‍👧</span><span class="option__text">Sim, meu pai ou mãe</span></button>
+        <button class="option" data-q="6" data-value="grandparents"><span class="option__icon">👵</span><span class="option__text">Sim, avós ou tios</span></button>
+        <button class="option" data-q="6" data-value="no"><span class="option__icon">❌</span><span class="option__text">Não, até onde sei</span></button>
+        <button class="option" data-q="6" data-value="unsure"><span class="option__icon">❓</span><span class="option__text">Não tenho certeza</span></button>
+      </div>
+      <div class="step__nav">
+        <button class="btn-back" onclick="goToStep(5)">← Voltar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════ STEP 7 (multi-select) ══════════════════ -->
+  <section class="step" id="step-7">
+    <div class="step__container">
+      <p class="question__number">Pergunta 7 de 10</p>
+      <h2 class="question__title">Quais dessas situações você passou nos últimos 12 meses?</h2>
+      <p class="question__hint">Pode selecionar mais de uma opção.</p>
+      <div class="options" data-multi="true">
+        <button class="option" data-q="7" data-value="stress"><span class="option__icon">😰</span><span class="option__text">Estresse intenso ou ansiedade</span></button>
+        <button class="option" data-q="7" data-value="pregnancy"><span class="option__icon">🤰</span><span class="option__text">Parto ou pós-parto recente</span></button>
+        <button class="option" data-q="7" data-value="hormonal"><span class="option__icon">🔄</span><span class="option__text">Mudança hormonal / menopausa</span></button>
+        <button class="option" data-q="7" data-value="surgery"><span class="option__icon">🏥</span><span class="option__text">Cirurgia ou doença grave</span></button>
+        <button class="option" data-q="7" data-value="weightloss"><span class="option__icon">⚖️</span><span class="option__text">Perda de peso rápida</span></button>
+        <button class="option" data-q="7" data-value="none"><span class="option__icon">✨</span><span class="option__text">Nenhuma dessas</span></button>
+      </div>
+      <div class="step__nav">
+        <button class="btn-back" onclick="goToStep(6)">← Voltar</button>
+        <button class="btn-next" id="step7-next" disabled="" onclick="goToStep(8)">Continuar →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════ STEP 8 ══════════════════ -->
+  <section class="step" id="step-8">
+    <div class="step__container">
+      <p class="question__number">Pergunta 8 de 10</p>
+      <h2 class="question__title">Com que frequência você faz química no cabelo?</h2>
+      <p class="question__hint">Tintura, progressiva, alisamento, relaxamento, descoloração…</p>
+      <div class="options">
+        <button class="option" data-q="8" data-value="never"><span class="option__icon">🚫</span><span class="option__text">Nunca faço</span></button>
+        <button class="option" data-q="8" data-value="rare"><span class="option__icon">🗓️</span><span class="option__text">Eventualmente (algumas vezes por ano)</span></button>
+        <button class="option" data-q="8" data-value="regular"><span class="option__icon">⚠️</span><span class="option__text">Regularmente (1-2 vezes por mês)</span></button>
+        <button class="option" data-q="8" data-value="frequent"><span class="option__icon">🔥</span><span class="option__text">Muito frequente (toda semana)</span></button>
+      </div>
+      <div class="step__nav">
+        <button class="btn-back" onclick="goToStep(7)">← Voltar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════ STEP 9 ══════════════════ -->
+  <section class="step" id="step-9">
+    <div class="step__container">
+      <p class="question__number">Pergunta 9 de 10</p>
+      <h2 class="question__title">Como está sua rotina de sono e alimentação?</h2>
+      <div class="options">
+        <button class="option" data-q="9" data-value="good"><span class="option__icon">💚</span><span class="option__text">Bem equilibrada</span></button>
+        <button class="option" data-q="9" data-value="fair"><span class="option__icon">💛</span><span class="option__text">Razoável, poderia melhorar</span></button>
+        <button class="option" data-q="9" data-value="poor"><span class="option__icon">🧡</span><span class="option__text">Desregulada</span></button>
+        <button class="option" data-q="9" data-value="bad"><span class="option__icon">❤️‍🩹</span><span class="option__text">Muito ruim / dormindo mal</span></button>
+      </div>
+      <div class="step__nav">
+        <button class="btn-back" onclick="goToStep(8)">← Voltar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════ STEP 10 ══════════════════ -->
+  <section class="step" id="step-10">
+    <div class="step__container">
+      <p class="question__number">Pergunta 10 de 10</p>
+      <h2 class="question__title">Já tentou algum tratamento e não funcionou?</h2>
+      <div class="options">
+        <button class="option" data-q="10" data-value="many"><span class="option__icon">😮‍💨</span><span class="option__text">Sim, vários, e nada funcionou</span></button>
+        <button class="option" data-q="10" data-value="few"><span class="option__icon">🤔</span><span class="option__text">Sim, um ou dois, sem resultado</span></button>
+        <button class="option" data-q="10" data-value="none"><span class="option__icon">🆕</span><span class="option__text">Ainda não tentei nada</span></button>
+        <button class="option" data-q="10" data-value="shampoo"><span class="option__icon">🧴</span><span class="option__text">Só usei shampoo comum</span></button>
+      </div>
+      <div class="step__nav">
+        <button class="btn-back" onclick="goToStep(9)">← Voltar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════ STEP 11 — LOADER ══════════════════ -->
+  <section class="step" id="step-11">
+    <div class="step__container loader">
+      <div class="loader__spinner"></div>
+      <h2 class="loader__title">Analisando suas respostas…</h2>
+      <p class="loader__subtitle">Nossa IA capilar está montando seu diagnóstico personalizado.</p>
+      <div class="loader__steps">
+        <div class="loader__step" id="loader-step-1">Identificando padrão da queda</div>
+        <div class="loader__step" id="loader-step-2">Cruzando com fatores hormonais e genéticos</div>
+        <div class="loader__step" id="loader-step-3">Avaliando hábitos e estilo de vida</div>
+        <div class="loader__step" id="loader-step-4">Gerando seu protocolo ideal</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════════
+       STEP 12 — PÁGINA DE VENDA
+       ══════════════════════════════════════════════════════════════ -->
+  <section class="step sales" id="step-12">
+    <div class="step__container">
+
+      <!-- Barra estilo portal -->
+      <header class="portal-header" aria-label="Portal Saúde">
+        <div class="portal-top">
+          <nav class="portal-top__inner" aria-label="Editorias">
+            <a class="portal-top__link" href="#">saude.com</a>
+            <a class="portal-top__link" href="#">saúde</a>
+            <a class="portal-top__link" href="#">bem-estar</a>
+            <a class="portal-top__link" href="#">beleza</a>
+            <a class="portal-top__link" href="#">nutrição</a>
+            <a class="portal-top__link" href="#">cabelo</a>
+            <a class="portal-top__link" href="#">tratamentos</a>
+            <a class="portal-top__link" href="#">valor</a>
+          </nav>
+        </div>
+        <div class="portal-main">
+          <div class="portal-main__inner">
+            <div class="portal-main__left">
+              <span class="portal-main__brand">saúde</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Hero de alerta com diagnóstico -->
+      <div class="alert-hero">
+        <span class="alert-hero__badge">⚠️ Atenção: Diagnóstico concluído</span>
+        <h1 class="alert-hero__title" id="diagTitle">SEU CABELO ESTÁ EM RISCO</h1>
+        <p class="alert-hero__diagnosis" id="diagText">Com base nas suas respostas, identificamos que você precisa tratar sua queda capilar com urgência. Continue lendo para ver o protocolo indicado para o seu caso.</p>
+        <div class="alert-hero__stats">
+          <div class="alert-hero__stat">
+            <span class="alert-hero__stat-num" id="diagRiskLevel">ALTO</span>
+            <span class="alert-hero__stat-lbl">Nível de risco</span>
+          </div>
+          <div class="alert-hero__stat">
+            <span class="alert-hero__stat-num">21 dias</span>
+            <span class="alert-hero__stat-lbl">Para reverter</span>
+          </div>
+          <div class="alert-hero__stat">
+            <span class="alert-hero__stat-num">12.487</span>
+            <span class="alert-hero__stat-lbl">Já usaram</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sales-wrap">
+
+        <!-- Seção DOR -->
+        <div class="section">
+          <div class="pain">
+            <h2 class="pain__title">Você provavelmente está vivendo isso agora:</h2>
+            <p class="pain__intro">A queda de cabelo não é apenas uma questão estética. É um ciclo silencioso que corrói a autoestima dia após dia — e você já deve estar reconhecendo alguns desses sinais:</p>
+            <div class="pain__list">
+              <div class="pain__item">Olhar pro travesseiro de manhã e ver mais fios do que ontem — e sentir um aperto no peito.</div>
+              <div class="pain__item">Evitar fazer penteados, prender o cabelo ou tirar foto porque "parece que está ralo demais".</div>
+              <div class="pain__item">Comprar shampoos, vitaminas e ampolas caras — e nada mudar de verdade.</div>
+              <div class="pain__item">Passar a mão no cabelo e sentir menos densidade, mais couro cabeludo aparecendo.</div>
+              <div class="pain__item">Ficar procurando "por que está caindo?" no Google toda noite, sem achar resposta clara.</div>
+              <div class="pain__item">Ter vergonha de falar sobre isso — mesmo sabendo que milhares de mulheres passam pela mesma coisa.</div>
+            </div>
+            <p class="pain__outro">Se você se reconheceu em pelo menos 2 desses pontos, o que vem a seguir é importante.</p>
+          </div>
+        </div>
+
+        <!-- Seção AGRAVAMENTO / STAKES -->
+        <div class="section">
+          <div class="stakes">
+            <span class="stakes__kicker">⚠ Atenção</span>
+            <h2 class="stakes__title">E se você <em>não fizer nada</em> nos próximos 21 dias?</h2>
+            <p class="stakes__intro">A queda capilar, quando ignorada, não fica estagnada — ela <strong>evolui silenciosamente</strong>. O que hoje é um incômodo, em poucos meses pode virar uma perda permanente. Veja o que costuma acontecer:</p>
+            <div class="stakes__list">
+              <div class="stakes__item">Os fios que estão caindo agora podem não voltar a nascer — a raiz entra em miniaturização e o folículo para de produzir fio saudável.</div>
+              <div class="stakes__item">A densidade continua diminuindo de forma progressiva, e a quantidade de couro cabeludo aparente aumenta a cada mês.</div>
+              <div class="stakes__item">Quando você finalmente buscar ajuda profissional, o tratamento tende a ser muito mais caro, longo e com resultado limitado.</div>
+              <div class="stakes__item">A autoestima é a primeira a ruir: vergonha de se ver no espelho, de tirar foto, de arrumar o cabelo em lugar público.</div>
+              <div class="stakes__item">Em casos mais graves, o quadro se torna irreversível — sobrando apenas opções invasivas como transplante capilar (que custa R$ 15.000 a R$ 40.000).</div>
+            </div>
+            <div class="stakes__turn">
+              <p class="stakes__turn-text">A boa notícia é que <strong>existe uma janela de oportunidade</strong> — e você ainda está nela.</p>
+              <p class="stakes__turn-highlight">Os próximos 21 dias vão decidir o futuro dos seus fios.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Apresentação do produto -->
+        <div class="section">
+          <span class="section__kicker">✨ A solução para o seu caso</span>
+          <h2 class="section__title">Protocolo Anti Queda Fortalecedor de Fios</h2>
+          <p class="section__text">Um guia passo a passo, desenvolvido com base em estudos tricológicos, que ensina mulheres e homens a interromper a queda capilar na raiz do problema e estimular o crescimento natural dos fios em apenas 21 dias — sem medicamentos caros, sem procedimentos invasivos e sem depender de profissionais.</p>
+
+          <div class="product">
+            <div class="product__image">
+              <img src="./assets/product-logo.png" alt="Protocolo Anti-Queda — Logo" loading="lazy">
+            </div>
+            <h3 class="product__name">Protocolo Anti Queda Fortalecedor de Fios</h3>
+            <p class="product__subtitle">Guia completo digital · Acesso imediato</p>
+
+            <div class="product__features">
+              <div class="product__feature">O protocolo diário de 3 passos simples para aplicar em casa (leva menos de 10 minutos por dia)</div>
+              <div class="product__feature">Lista completa dos nutrientes essenciais para fortalecer a raiz do fio de dentro para fora</div>
+              <div class="product__feature">Rotina de limpeza e massagem no couro cabeludo que acelera o crescimento natural</div>
+              <div class="product__feature">Os 7 hábitos que parecem inofensivos mas estão enfraquecendo o seu cabelo todos os dias</div>
+              <div class="product__feature">Bônus #1: Receitas naturais caseiras para potencializar o tratamento</div>
+              <div class="product__feature">Bônus #2: Guia de alimentos que fortalecem o cabelo a partir da nutrição</div>
+              <div class="product__feature">Bônus #3: Plano de 21 dias com checklist diário para acompanhar seus resultados</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Depoimentos -->
+        <div class="section">
+          <h2 class="section__title">Veja quem já está transformando os fios:</h2>
+          <div class="testimonials">
+            <div class="testimonial">
+              <div class="testimonial__head">
+                <div class="testimonial__avatar">
+                  <img src="./assets/testimonial-ana-clara.png" alt="Ana Clara" loading="lazy">
+                </div>
+                <div>
+                  <div class="testimonial__name">Ana Clara, 34</div>
+                  <div class="testimonial__stars">★★★★★</div>
+                </div>
+              </div>
+              <p class="testimonial__text">"Em 45 dias seguindo o protocolo, percebi que a queda no travesseiro reduziu pela metade. Meu cabelo está visivelmente mais cheio."</p>
+            </div>
+            <div class="testimonial">
+              <div class="testimonial__head">
+                <div class="testimonial__avatar">
+                  <img src="./assets/testimonial-marina.png" alt="Marina R." loading="lazy">
+                </div>
+                <div>
+                  <div class="testimonial__name">Marina R., 41</div>
+                  <div class="testimonial__stars">★★★★★</div>
+                </div>
+              </div>
+              <p class="testimonial__text">"Depois do parto minha queda foi assustadora. O protocolo foi o único que explicou direito o que eu estava passando e me deu um caminho claro."</p>
+            </div>
+            <div class="testimonial">
+              <div class="testimonial__head">
+                <div class="testimonial__avatar">
+                  <img src="./assets/testimonial-leticia.png" alt="Letícia F." loading="lazy">
+                </div>
+                <div>
+                  <div class="testimonial__name">Letícia F., 28</div>
+                  <div class="testimonial__stars">★★★★★</div>
+                </div>
+              </div>
+              <p class="testimonial__text">"Já tinha tentado shampoo caro, vitamina, tudo. Esse guia me mostrou que o problema estava em coisas simples do meu dia a dia. Mudou meu cabelo."</p>
+            </div>
+            <div class="testimonial">
+              <div class="testimonial__head">
+                <div class="testimonial__avatar">
+                  <img src="./assets/testimonial-patricia.png" alt="Patrícia S." loading="lazy">
+                </div>
+                <div>
+                  <div class="testimonial__name">Patrícia S., 47</div>
+                  <div class="testimonial__stars">★★★★★</div>
+                </div>
+              </div>
+              <p class="testimonial__text">"Entrei na menopausa e meu cabelo afinou muito. O protocolo me trouxe de volta a densidade e o brilho que eu não tinha há anos."</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Seção VALUE STACK -->
+        <div class="section">
+          <div class="stack">
+            <h2 class="stack__title">Tudo que você leva ao entrar hoje:</h2>
+            <div class="stack__list">
+              <div class="stack__row">
+                <span class="stack__row-text">Protocolo Anti Queda Fortalecedor de Fios (guia principal)</span>
+                <span class="stack__row-price">R$ 147,00</span>
+              </div>
+              <div class="stack__row">
+                <span class="stack__row-text">Lista completa de nutrientes essenciais para a raiz do fio</span>
+                <span class="stack__row-price">R$ 67,00</span>
+              </div>
+              <div class="stack__row">
+                <span class="stack__row-text">Rotina de limpeza e massagem capilar que acelera o crescimento</span>
+                <span class="stack__row-price">R$ 67,00</span>
+              </div>
+              <div class="stack__row">
+                <span class="stack__row-text">Os 7 hábitos silenciosos que enfraquecem seus fios todos os dias</span>
+                <span class="stack__row-price">R$ 47,00</span>
+              </div>
+              <div class="stack__row">
+                <span class="stack__row-text">🎁 Bônus #1: Receitas naturais caseiras para potencializar o tratamento</span>
+                <span class="stack__row-price free">R$ 67,00</span>
+              </div>
+              <div class="stack__row">
+                <span class="stack__row-text">🎁 Bônus #2: Guia de alimentos que fortalecem o cabelo pela nutrição</span>
+                <span class="stack__row-price free">R$ 47,00</span>
+              </div>
+              <div class="stack__row">
+                <span class="stack__row-text">🎁 Bônus #3: Plano de 21 dias com checklist diário de acompanhamento</span>
+                <span class="stack__row-price free">R$ 57,00</span>
+              </div>
+            </div>
+
+            <div class="stack__total">
+              <span class="stack__total-lbl">Valor total se comprasse separado:</span>
+              <span class="stack__total-val">R$ 499,00</span>
+            </div>
+
+            <div class="stack__today">
+              <p class="stack__today-lbl">🔥 Mas hoje, por tempo limitado, você leva tudo por apenas:</p>
+              <p class="stack__today-val">R$ 27<small>,00</small></p>
+              <span class="stack__today-note">economia de 94% · acesso imediato · garantia de 30 dias</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Countdown -->
+        <div class="countdown">
+          <p class="countdown__label">⏰ Oferta especial reservada por:</p>
+          <div class="countdown__timer">
+            <span class="countdown__box" id="cd-min">13</span>
+            <span class="countdown__box" id="cd-sec">33</span>
+          </div>
+        </div>
+
+        <!-- Oferta -->
+        <div class="offer">
+          <p class="offer__label">🔥 Condição especial de lançamento</p>
+          <p style="font-size:0.95rem; opacity:0.9;">Valor total dos módulos + bônus:</p>
+          <div class="offer__price-wrap">
+            <span class="offer__price-old">De R$ 97,00</span>
+            <span class="offer__price">
+              <span class="offer__price-currency">R$</span>27<span class="offer__price-cents">,00</span>
+            </span>
+            <span class="offer__price-note">ou 3x de R$ 9,34 no cartão</span>
+          </div>
+          <a href="https://pay.youshop.com.br/UMZ759DNWWLGTV0Y" class="offer__cta" data-cta="main">
+            🔒 QUERO MEU PROTOCOLO AGORA
+          </a>
+          <p class="offer__secure">🔐 Compra 100% segura · Acesso imediato após pagamento</p>
+        </div>
+
+        <!-- Garantia -->
+        <div class="section">
+          <div class="guarantee">
+            <div class="guarantee__seal">
+              <span class="guarantee__seal-num">30</span>
+              <span class="guarantee__seal-lbl">DIAS</span>
+            </div>
+            <h3 class="guarantee__title">Garantia incondicional de 30 dias</h3>
+            <p class="guarantee__text">Se por qualquer motivo você achar que o protocolo não é para você, basta enviar um e-mail e devolvemos 100% do seu dinheiro. Sem perguntas. Sem burocracia.</p>
+          </div>
+        </div>
+
+        <!-- Seção 2 CAMINHOS -->
+        <div class="section">
+          <span class="section__kicker">A partir daqui, só existem dois caminhos</span>
+          <h2 class="section__title">Qual deles vai ser o seu?</h2>
+
+          <div class="paths">
+            <!-- Caminho 1 — Ganho -->
+            <div class="path path--win">
+              <div class="path__icon">✓</div>
+              <p class="path__kicker">Caminho 1</p>
+              <h3 class="path__title">Você decide agir agora e começa seu tratamento em 10 minutos</h3>
+              <ul class="path__list">
+                <li class="path__item">Em 7 dias você já percebe menos fios no travesseiro e na escova.</li>
+                <li class="path__item">Em 21 dias, seu cabelo estará visivelmente mais forte, denso e com brilho natural.</li>
+                <li class="path__item">Você recupera a confiança de fazer qualquer penteado, tirar fotos e se olhar no espelho sem medo.</li>
+                <li class="path__item">Você para de gastar com shampoos, ampolas e vitaminas caras que não resolvem.</li>
+                <li class="path__item">Você evita completamente o cenário de transplante (que custa R$ 15 a 40 mil no futuro).</li>
+              </ul>
+              <a href="https://pay.youshop.com.br/UMZ759DNWWLGTV0Y" class="path__cta" data-cta="path-win">
+                Quero este caminho — R$ 27 →
+              </a>
+            </div>
+
+            <!-- Caminho 2 — Perda -->
+            <div class="path path--lose">
+              <div class="path__icon">✗</div>
+              <p class="path__kicker">Caminho 2</p>
+              <h3 class="path__title">Você fecha esta página e deixa tudo como está</h3>
+              <ul class="path__list">
+                <li class="path__item">Amanhã de manhã, mais fios vão estar no seu travesseiro. E no próximo. E no próximo.</li>
+                <li class="path__item">Em poucos meses, a densidade cai tanto que maquiar falhas vira rotina.</li>
+                <li class="path__item">A vergonha de se olhar no espelho aumenta. A autoestima diminui silenciosamente.</li>
+                <li class="path__item">Os folículos entram em miniaturização e a queda se torna irreversível sem cirurgia.</li>
+                <li class="path__item">No futuro, você vai gastar 500× mais para tentar reverter o que hoje custa só R$ 27.</li>
+              </ul>
+              <p class="path__warning">Esse é o caminho da maioria — e o mais doloroso.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- FAQ -->
+        <div class="section">
+          <span class="section__kicker">Perguntas frequentes</span>
+          <h2 class="section__title">Ainda tem alguma dúvida?</h2>
+          <div class="faq">
+            <div class="faq__item">
+              <button class="faq__question" onclick="toggleFaq(this)">Como recebo o protocolo depois da compra?<span></span></button>
+              <div class="faq__answer">Imediatamente após a confirmação do pagamento, você recebe o acesso por e-mail com o link para baixar o guia completo em PDF. Pode ler no celular, tablet ou computador.</div>
+            </div>
+            <div class="faq__item">
+              <button class="faq__question" onclick="toggleFaq(this)">Funciona mesmo se eu tiver queda há vários anos?<span></span></button>
+              <div class="faq__answer">Sim. O protocolo foi desenvolvido para diferentes perfis de queda — inclusive casos crônicos. Os resultados variam, mas a grande maioria começa a perceber diferença nos primeiros 30 a 45 dias.</div>
+            </div>
+            <div class="faq__item">
+              <button class="faq__question" onclick="toggleFaq(this)">Preciso comprar algum produto caro além do guia?<span></span></button>
+              <div class="faq__answer">Não. O protocolo usa ingredientes e insumos acessíveis, a maioria você já tem em casa ou encontra em qualquer mercado. Zero custo extra obrigatório.</div>
+            </div>
+            <div class="faq__item">
+              <button class="faq__question" onclick="toggleFaq(this)">Serve para homens ou é só para mulheres?<span></span></button>
+              <div class="faq__answer">Serve para ambos. Dentro do protocolo há adaptações específicas para cada perfil — queda androgenética, eflúvio pós-estresse, queda por dano químico, etc.</div>
+            </div>
+            <div class="faq__item">
+              <button class="faq__question" onclick="toggleFaq(this)">Em quanto tempo vejo resultado?<span></span></button>
+              <div class="faq__answer">A maioria das pessoas percebe uma redução significativa na queda já nos primeiros 21 dias de aplicação diária. Os fios novos começam a aparecer logo em seguida, nas semanas seguintes.</div>
+            </div>
+            <div class="faq__item">
+              <button class="faq__question" onclick="toggleFaq(this)">E se eu não gostar? Tem garantia?<span></span></button>
+              <div class="faq__answer">Sim. Você tem 30 dias de garantia incondicional. Se não gostar por qualquer motivo, enviamos 100% do valor de volta. Sem burocracia.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CTA final -->
+        <div class="section">
+          <div class="offer">
+            <p class="offer__label">Última chance</p>
+            <h3 style="font-size:1.25rem; margin-bottom:0.5rem;">Comece hoje mesmo a reverter a sua queda</h3>
+            <div class="offer__price-wrap">
+              <span class="offer__price-old">De R$ 97,00</span>
+              <span class="offer__price">
+                <span class="offer__price-currency">R$</span>27<span class="offer__price-cents">,00</span>
+              </span>
+              <span class="offer__price-note">Acesso vitalício · Garantia de 30 dias</span>
+            </div>
+            <a href="https://pay.youshop.com.br/UMZ759DNWWLGTV0Y" class="offer__cta" data-cta="final">
+              🔒 QUERO COMEÇAR AGORA
+            </a>
+            <p class="offer__secure">🔐 Pagamento seguro por Pix, cartão ou boleto</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <footer>
+        <p>Copyright 2026 – Lushe ®. Todos os direitos reservados.</p>
+        <div class="footer__links">
+          <span>Termos de Uso</span> |
+          <span>Política de privacidade</span>
+        </div>
+        <p class="footer__disclaimer">As informações contidas nesta página são publicadas exclusivamente para fins informativos e educacionais. Este material não se destina a diagnosticar, tratar, curar ou prevenir qualquer doença e não pode ser considerado como aconselhamento médico. Resultados variam de pessoa para pessoa. Para qualquer questão relativa à sua saúde, consulte um profissional devidamente credenciado.</p>
+      </footer>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════ SCRIPTS ══════════════════ -->
+  <script
+    src="https://cdn.utmify.com.br/scripts/utms/latest.js"
+    data-utmify-prevent-xcod-sck
+    data-utmify-prevent-subids
+    async
+    defer
+  ></script>
+
+  <script type="text/javascript">
+  (function() {
+    'use strict';
+
+    var TOTAL_QUESTIONS = 10;
+    var currentStep = 0;
+    var answers = {};
+
+    var progressFill = document.getElementById('quizProgressFill');
+    var progressBar = document.getElementById('quizProgress');
+    var counter = document.getElementById('quizCounter');
+
+    // ───── Navegação entre steps ─────
+    window.goToStep = function(n) {
+      var current = document.querySelector('.step.active');
+      if (current) current.classList.remove('active');
+      var next = document.getElementById('step-' + n);
+      if (!next) return;
+      next.classList.add('active');
+      currentStep = n;
+      updateProgress(n);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      if (n === 11) startLoader();
+      if (n === 12) renderDiagnostic();
+    };
+
+    function updateProgress(n) {
+      if (n >= 1 && n <= 10) {
+        progressBar.classList.remove('hidden');
+        counter.classList.remove('hidden');
+        counter.textContent = 'Pergunta ' + n + ' de ' + TOTAL_QUESTIONS;
+        progressFill.style.width = (n * 10) + '%';
+      } else {
+        progressBar.classList.add('hidden');
+        counter.classList.add('hidden');
+        if (n === 11) progressFill.style.width = '100%';
+      }
+    }
+
+    // ───── Handler de opções (single-select) ─────
+    document.querySelectorAll('.options:not([data-multi="true"]) .option').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var q = parseInt(btn.dataset.q, 10);
+        var value = btn.dataset.value;
+        answers[q] = value;
+
+        // feedback visual
+        var siblings = btn.parentElement.querySelectorAll('.option');
+        siblings.forEach(function(s) { s.classList.remove('selected'); });
+        btn.classList.add('selected');
+
+        // avança automaticamente após pequeno delay (feedback visual)
+        var nextStep = (q === 10) ? 11 : (q + 1);
+        setTimeout(function() { window.goToStep(nextStep); }, 280);
+      });
+    });
+
+    // ───── Handler multi-select (Step 7) ─────
+    var step7Options = document.querySelectorAll('#step-7 .option');
+    var step7Next = document.getElementById('step7-next');
+    step7Options.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var value = btn.dataset.value;
+        if (!answers[7]) answers[7] = [];
+
+        if (value === 'none') {
+          // "nenhuma dessas" limpa e marca só essa
+          answers[7] = ['none'];
+          step7Options.forEach(function(s) { s.classList.remove('selected'); });
+          btn.classList.add('selected');
+        } else {
+          // remove "none" se outra for marcada
+          answers[7] = answers[7].filter(function(v) { return v !== 'none'; });
+          document.querySelector('#step-7 .option[data-value="none"]').classList.remove('selected');
+
+          if (btn.classList.contains('selected')) {
+            btn.classList.remove('selected');
+            answers[7] = answers[7].filter(function(v) { return v !== value; });
+          } else {
+            btn.classList.add('selected');
+            answers[7].push(value);
+          }
+        }
+
+        step7Next.disabled = (answers[7].length === 0);
+      });
+    });
+
+    // ───── Loader animado (Step 11) ─────
+    function startLoader() {
+      var steps = ['loader-step-1', 'loader-step-2', 'loader-step-3', 'loader-step-4'];
+      steps.forEach(function(id, i) {
+        setTimeout(function() {
+          var el = document.getElementById(id);
+          if (el) el.classList.add('done');
+        }, 500 + i * 700);
+      });
+      setTimeout(function() { window.goToStep(12); }, 3400);
+    }
+
+    // ───── Lógica de diagnóstico ─────
+    function calculateDiagnostic() {
+      var a = answers;
+      var events = Array.isArray(a[7]) ? a[7] : [];
+      var hasStressEvent = events.some(function(e) {
+        return ['stress', 'pregnancy', 'hormonal', 'surgery', 'weightloss'].indexOf(e) !== -1;
+      });
+      var shortDuration = a[3] === '<3m' || a[3] === '3-6m';
+      var familyHistory = a[6] === 'parents' || a[6] === 'grandparents';
+      var frontalOrCrown = a[4] === 'frontal' || a[4] === 'crown';
+      var chemicalFrequent = a[8] === 'regular' || a[8] === 'frequent';
+      var diffuse = a[4] === 'diffuse';
+      var highLoss = a[5] === '100-200' || a[5] === '>200';
+
+      // Classifica em 1 de 4 perfis
+      if (hasStressEvent && shortDuration) {
+        return {
+          title: 'EFLÚVIO TELÓGENO DETECTADO',
+          text: 'Com base nas suas respostas, identificamos um padrão compatível com <strong>eflúvio telógeno pós-estresse</strong> — a queda aguda causada por eventos marcantes (parto, cirurgia, estresse intenso ou mudança hormonal). A boa notícia: é uma condição totalmente reversível quando tratada corretamente.',
+          risk: 'MÉDIO'
+        };
+      }
+      if (familyHistory && frontalOrCrown) {
+        return {
+          title: 'QUEDA ANDROGENÉTICA EM PROGRESSÃO',
+          text: 'Suas respostas indicam um padrão compatível com <strong>queda androgenética (genética)</strong> em fase inicial/intermediária. Sem tratamento, tende a progredir. Com o protocolo certo, é possível estabilizar e até reverter o afinamento — quanto antes você começar, melhor o resultado.',
+          risk: 'ALTO'
+        };
+      }
+      if (chemicalFrequent && diffuse) {
+        return {
+          title: 'DANO QUÍMICO COMPROMETENDO A RAIZ',
+          text: 'Seu padrão é compatível com <strong>queda multifatorial por dano químico</strong>. A química frequente enfraquece o fio da raiz para fora, causando quebra e queda difusa. Com o protocolo de reestruturação, é possível recuperar a força e a densidade dos fios.',
+          risk: 'ALTO'
+        };
+      }
+      if (highLoss) {
+        return {
+          title: 'QUEDA ACELERADA EM ESTADO CRÍTICO',
+          text: 'Você está em um padrão de <strong>queda crítica generalizada</strong>. Perder mais de 100 fios por dia de forma contínua é um sinal de alerta importante. O protocolo foi desenhado exatamente para esse cenário: agir rápido, interromper a queda e recuperar os fios perdidos.',
+          risk: 'ALTO'
+        };
+      }
+      return {
+        title: 'ALERTA DE QUEDA EM EVOLUÇÃO',
+        text: 'Suas respostas mostram um quadro de <strong>queda em evolução com múltiplos fatores</strong>. A combinação de hábitos, estilo de vida e predisposição já está enfraquecendo seus fios. O protocolo certo, aplicado agora, evita que a queda se agrave nos próximos meses.',
+        risk: 'MÉDIO'
+      };
+    }
+
+    function renderDiagnostic() {
+      var d = calculateDiagnostic();
+      document.getElementById('diagTitle').textContent = d.title;
+      document.getElementById('diagText').innerHTML = d.text;
+      document.getElementById('diagRiskLevel').textContent = d.risk;
+    }
+
+    // ───── Countdown 15 min ─────
+    var countdownMin = document.getElementById('cd-min');
+    var countdownSec = document.getElementById('cd-sec');
+    var endTime = Date.now() + 15 * 60 * 1000;
+
+    function tickCountdown() {
+      var diff = Math.max(0, endTime - Date.now());
+      var mins = Math.floor(diff / 60000);
+      var secs = Math.floor((diff % 60000) / 1000);
+      if (countdownMin) countdownMin.textContent = String(mins).padStart(2, '0');
+      if (countdownSec) countdownSec.textContent = String(secs).padStart(2, '0');
+    }
+    tickCountdown();
+    setInterval(tickCountdown, 1000);
+
+    // ───── FAQ toggle ─────
+    window.toggleFaq = function(btn) {
+      var item = btn.parentElement;
+      item.classList.toggle('open');
+    };
+
+    // ───── Estado inicial ─────
+    updateProgress(0);
+  })();
+  </script>
+
+</body></html>
