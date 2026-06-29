@@ -317,15 +317,34 @@ begin
   v_amount_text := coalesce(
     nullif(payload#>>'{sale,amount}', ''),
     nullif(payload#>>'{sale,total}', ''),
+    nullif(payload#>>'{sale,value}', ''),
+    nullif(payload#>>'{sale,price}', ''),
     nullif(payload#>>'{payment,amount}', ''),
     nullif(payload#>>'{payment,total}', ''),
+    nullif(payload#>>'{payment,value}', ''),
+    nullif(payload#>>'{payment,price}', ''),
+    nullif(payload#>>'{order,amount}', ''),
+    nullif(payload#>>'{order,total}', ''),
+    nullif(payload#>>'{order,value}', ''),
+    nullif(payload#>>'{order,price}', ''),
+    nullif(payload#>>'{transaction,amount}', ''),
+    nullif(payload#>>'{transaction,total}', ''),
+    nullif(payload#>>'{transaction,value}', ''),
+    nullif(payload#>>'{transaction,price}', ''),
+    nullif(payload#>>'{product,amount}', ''),
+    nullif(payload#>>'{product,total}', ''),
+    nullif(payload#>>'{product,value}', ''),
+    nullif(payload#>>'{product,price}', ''),
     nullif(payload->>'amount', ''),
     nullif(payload->>'total', ''),
-    nullif(payload->>'value', '')
+    nullif(payload->>'value', ''),
+    nullif(payload->>'price', '')
   );
 
   if coalesce(v_amount_text, '') ~ '^[0-9]+([,.][0-9]+)?$' then
     v_amount := replace(v_amount_text, ',', '.')::numeric(12,2);
+  elsif v_status = 'paid' then
+    v_amount := 26.90;
   else
     v_amount := null;
   end if;
