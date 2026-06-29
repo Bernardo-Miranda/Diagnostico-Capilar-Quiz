@@ -217,6 +217,181 @@ $$;
 
 grant execute on function public.save_quiz_lead(jsonb) to anon;
 
+-- Tabela para compras recebidas pelo webhook da Lowify.
+-- Cada linha representa uma venda/pendência/reembolso enviado pelo gateway.
+create table if not exists public.lowify_sales (
+  id uuid primary key default gen_random_uuid(),
+  received_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+
+  sale_id text not null unique,
+  event_name text,
+  sale_status text not null default 'unknown',
+  event_timestamp timestamptz,
+
+  product_id text,
+  product_name text,
+
+  customer_name text,
+  customer_email text,
+  customer_phone text,
+
+  amount_total numeric(12,2),
+  currency text not null default 'BRL',
+
+  tracking_click_id text,
+  tracking_campaign_id text,
+  utm_source text,
+  utm_medium text,
+  utm_campaign text,
+  utm_content text,
+  utm_term text,
+  fbclid text,
+  gclid text,
+
+  payload jsonb not null default '{}'::jsonb
+);
+
+create index if not exists lowify_sales_received_at_idx
+  on public.lowify_sales (received_at desc);
+
+create index if not exists lowify_sales_status_idx
+  on public.lowify_sales (sale_status);
+
+create index if not exists lowify_sales_utm_source_idx
+  on public.lowify_sales (utm_source);
+
+alter table public.lowify_sales enable row level security;
+
+-- Sem policy de SELECT/INSERT para anon.
+-- O visitante não lê nem grava direto nessa tabela.
+-- Quem grava é a função security definer abaixo.
+
+create or replace function public.save_lowify_sale(payload jsonb)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_event text;
+  v_sale_id text;
+  v_status text;
+  v_amount_text text;
+  v_amount numeric(12,2);
+begin
+  v_event := coalesce(payload->>'event', payload->>'evento', '');
+  v_sale_id := coalesce(
+    nullif(payload->>'sale_id', ''),
+    nullif(payload#>>'{sale,id}', ''),
+    nullif(payload#>>'{order,id}', ''),
+    nullif(payload#>>'{transaction,id}', ''),
+    md5(payload::text)
+  );
+
+  v_status := case
+    when lower(v_event) in ('sale.paid', 'venda aprovada', 'venda_aprovada', 'paid', 'approved') then 'paid'
+    when lower(v_event) in ('sale.pending', 'venda pendente', 'venda_pendente', 'pending') then 'pending'
+    when lower(v_event) in ('sale.refund', 'sale.refunded', 'reembolso', 'refund', 'refunded') then 'refund'
+    else coalesce(nullif(lower(v_event), ''), 'unknown')
+  end;
+
+  v_amount_text := coalesce(
+    nullif(payload#>>'{sale,amount}', ''),
+    nullif(payload#>>'{sale,total}', ''),
+    nullif(payload#>>'{payment,amount}', ''),
+    nullif(payload#>>'{payment,total}', ''),
+    nullif(payload->>'amount', ''),
+    nullif(payload->>'total', ''),
+    nullif(payload->>'value', '')
+  );
+
+  if coalesce(v_amount_text, '') ~ '^[0-9]+([,.][0-9]+)?$' then
+    v_amount := replace(v_amount_text, ',', '.')::numeric(12,2);
+  else
+    v_amount := null;
+  end if;
+
+  insert into public.lowify_sales (
+    sale_id,
+    event_name,
+    sale_status,
+    event_timestamp,
+    product_id,
+    product_name,
+    customer_name,
+    customer_email,
+    customer_phone,
+    amount_total,
+    currency,
+    tracking_click_id,
+    tracking_campaign_id,
+    utm_source,
+    utm_medium,
+    utm_campaign,
+    utm_content,
+    utm_term,
+    fbclid,
+    gclid,
+    payload
+  )
+  values (
+    v_sale_id,
+    nullif(v_event, ''),
+    v_status,
+    nullif(payload->>'timestamp', '')::timestamptz,
+    nullif(coalesce(payload#>>'{product,id}', payload->>'product_id'), ''),
+    nullif(coalesce(payload#>>'{product,name}', payload->>'product_name'), ''),
+    nullif(coalesce(payload#>>'{customer,name}', payload->>'customer_name'), ''),
+    nullif(coalesce(payload#>>'{customer,email}', payload->>'customer_email'), ''),
+    nullif(coalesce(payload#>>'{customer,phone}', payload->>'customer_phone'), ''),
+    v_amount,
+    coalesce(nullif(payload->>'currency', ''), 'BRL'),
+    nullif(coalesce(payload#>>'{tracking,click_id}', payload->>'click_id'), ''),
+    nullif(coalesce(payload#>>'{tracking,campaign_id}', payload->>'campaign_id'), ''),
+    nullif(coalesce(payload#>>'{tracking,utm_source}', payload->>'utm_source'), ''),
+    nullif(coalesce(payload#>>'{tracking,utm_medium}', payload->>'utm_medium'), ''),
+    nullif(coalesce(payload#>>'{tracking,utm_campaign}', payload->>'utm_campaign'), ''),
+    nullif(coalesce(payload#>>'{tracking,utm_content}', payload->>'utm_content'), ''),
+    nullif(coalesce(payload#>>'{tracking,utm_term}', payload->>'utm_term'), ''),
+    nullif(coalesce(payload#>>'{tracking,fbclid}', payload->>'fbclid'), ''),
+    nullif(coalesce(payload#>>'{tracking,gclid}', payload->>'gclid'), ''),
+    payload
+  )
+  on conflict (sale_id) do update set
+    updated_at = now(),
+    event_name = coalesce(excluded.event_name, public.lowify_sales.event_name),
+    sale_status = excluded.sale_status,
+    event_timestamp = coalesce(excluded.event_timestamp, public.lowify_sales.event_timestamp),
+    product_id = coalesce(excluded.product_id, public.lowify_sales.product_id),
+    product_name = coalesce(excluded.product_name, public.lowify_sales.product_name),
+    customer_name = coalesce(excluded.customer_name, public.lowify_sales.customer_name),
+    customer_email = coalesce(excluded.customer_email, public.lowify_sales.customer_email),
+    customer_phone = coalesce(excluded.customer_phone, public.lowify_sales.customer_phone),
+    amount_total = coalesce(excluded.amount_total, public.lowify_sales.amount_total),
+    currency = coalesce(excluded.currency, public.lowify_sales.currency),
+    tracking_click_id = coalesce(excluded.tracking_click_id, public.lowify_sales.tracking_click_id),
+    tracking_campaign_id = coalesce(excluded.tracking_campaign_id, public.lowify_sales.tracking_campaign_id),
+    utm_source = coalesce(excluded.utm_source, public.lowify_sales.utm_source),
+    utm_medium = coalesce(excluded.utm_medium, public.lowify_sales.utm_medium),
+    utm_campaign = coalesce(excluded.utm_campaign, public.lowify_sales.utm_campaign),
+    utm_content = coalesce(excluded.utm_content, public.lowify_sales.utm_content),
+    utm_term = coalesce(excluded.utm_term, public.lowify_sales.utm_term),
+    fbclid = coalesce(excluded.fbclid, public.lowify_sales.fbclid),
+    gclid = coalesce(excluded.gclid, public.lowify_sales.gclid),
+    payload = excluded.payload;
+
+  return jsonb_build_object(
+    'ok', true,
+    'sale_id', v_sale_id,
+    'sale_status', v_status
+  );
+end;
+$$;
+
+revoke all on function public.save_lowify_sale(jsonb) from public;
+grant execute on function public.save_lowify_sale(jsonb) to anon;
+
 create or replace function public.get_quiz_leads_dashboard()
 returns jsonb
 language sql
@@ -228,6 +403,10 @@ base as (
   select *
   from public.quiz_leads
 ),
+sales_base as (
+  select *
+  from public.lowify_sales
+),
 summary as (
   select
     count(*)::integer as total_leads,
@@ -236,6 +415,10 @@ summary as (
     count(*) filter (where clicou_checkout = true)::integer as leads_checkout,
     count(*) filter (where created_at >= date_trunc('day', now()))::integer as leads_hoje,
     count(*) filter (where created_at >= now() - interval '7 days')::integer as leads_7_dias,
+    (select count(*)::integer from sales_base where sale_status = 'paid') as vendas_aprovadas,
+    (select count(*)::integer from sales_base where sale_status = 'pending') as vendas_pendentes,
+    (select count(*)::integer from sales_base where sale_status = 'refund') as vendas_reembolsadas,
+    (select coalesce(sum(amount_total), 0)::numeric(12,2) from sales_base where sale_status = 'paid') as receita_aprovada,
     max(updated_at) as ultimo_evento
   from base
 ),
@@ -337,6 +520,10 @@ select jsonb_build_object(
       'leads_checkout', leads_checkout,
       'leads_hoje', leads_hoje,
       'leads_7_dias', leads_7_dias,
+      'vendas_aprovadas', vendas_aprovadas,
+      'vendas_pendentes', vendas_pendentes,
+      'vendas_reembolsadas', vendas_reembolsadas,
+      'receita_aprovada', receita_aprovada,
       'taxa_conclusao', taxa_conclusao,
       'taxa_checkout', taxa_checkout,
       'ultimo_evento', ultimo_evento
@@ -347,7 +534,8 @@ select jsonb_build_object(
     select jsonb_build_array(
       jsonb_build_object('nome', 'Iniciaram', 'total', leads_iniciados),
       jsonb_build_object('nome', 'Concluíram', 'total', leads_concluidos),
-      jsonb_build_object('nome', 'Checkout', 'total', leads_checkout)
+      jsonb_build_object('nome', 'Checkout', 'total', leads_checkout),
+      jsonb_build_object('nome', 'Compraram', 'total', vendas_aprovadas)
     )
     from rates
   ),

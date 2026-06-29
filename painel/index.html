@@ -566,6 +566,10 @@
 
     const $ = (id) => document.getElementById(id);
     const formatNumber = new Intl.NumberFormat('pt-BR');
+    const formatCurrency = new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    });
     const formatDate = new Intl.DateTimeFormat('pt-BR', {
       day: '2-digit',
       month: '2-digit',
@@ -668,6 +672,9 @@
     function renderMetrics(summary) {
       const cards = [
         ['Leads totais', summary.total_leads, 'todas as sessões salvas'],
+        ['Vendas aprovadas', summary.vendas_aprovadas, 'webhook Lowify'],
+        ['Receita aprovada', formatCurrency.format(Number(summary.receita_aprovada || 0)), 'vendas pagas'],
+        ['Pendentes', summary.vendas_pendentes, 'aguardando pagamento'],
         ['Hoje', summary.leads_hoje, 'leads criados hoje'],
         ['7 dias', summary.leads_7_dias, 'últimos sete dias'],
         ['Checkout', summary.leads_checkout, `${pct(summary.taxa_checkout)} pós-diagnóstico`],
