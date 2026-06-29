@@ -528,22 +528,30 @@ respostas_top as (
 ),
 recentes as (
   select
-    created_at,
-    updated_at,
-    status,
-    genero,
-    faixa_etaria,
-    tempo_queda,
-    padrao_queda,
-    fios_por_dia,
-    eventos_ultimos_12_meses,
-    diagnostico,
-    nivel_risco,
-    clicou_checkout,
-    coalesce(nullif(utm_source, ''), 'sem_utm') as utm_source,
-    coalesce(nullif(utm_campaign, ''), 'sem_campanha') as utm_campaign,
-    left(session_id, 8) as sessao
-  from base
+    b.created_at,
+    b.updated_at,
+    b.status,
+    b.genero,
+    b.faixa_etaria,
+    b.tempo_queda,
+    b.padrao_queda,
+    b.fios_por_dia,
+    b.eventos_ultimos_12_meses,
+    b.diagnostico,
+    b.nivel_risco,
+    b.clicou_checkout,
+    exists (
+      select 1
+      from sales_base s
+      where s.sale_status = 'paid'
+        and coalesce(nullif(s.utm_source, ''), 'sem_utm') = coalesce(nullif(b.utm_source, ''), 'sem_utm')
+        and coalesce(nullif(s.utm_campaign, ''), 'sem_campanha') = coalesce(nullif(b.utm_campaign, ''), 'sem_campanha')
+        and s.received_at >= b.created_at - interval '2 hours'
+    ) as venda_aprovada,
+    coalesce(nullif(b.utm_source, ''), 'sem_utm') as utm_source,
+    coalesce(nullif(b.utm_campaign, ''), 'sem_campanha') as utm_campaign,
+    left(b.session_id, 8) as sessao
+  from base b
   order by updated_at desc
   limit 80
 )
@@ -606,6 +614,7 @@ select jsonb_build_object(
       'diagnostico', diagnostico,
       'nivel_risco', nivel_risco,
       'clicou_checkout', clicou_checkout,
+      'venda_aprovada', venda_aprovada,
       'utm_source', utm_source,
       'utm_campaign', utm_campaign,
       'sessao', sessao

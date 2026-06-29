@@ -549,6 +549,7 @@
                 <th>Queda</th>
                 <th>Diagnóstico</th>
                 <th>Checkout</th>
+                <th>Venda aprovada</th>
                 <th>Origem</th>
               </tr>
             </thead>
@@ -761,9 +762,10 @@
           <td>${escapeHtml([lead.tempo_queda, lead.padrao_queda, lead.fios_por_dia].filter(Boolean).join(' · ') || '-')}</td>
           <td>${escapeHtml(lead.diagnostico || '-')}<br><span class="muted">${escapeHtml(lead.nivel_risco || '')}</span></td>
           <td>${lead.clicou_checkout ? 'Sim' : 'Não'}</td>
+          <td>${lead.venda_aprovada ? 'Sim' : 'Não'}</td>
           <td>${escapeHtml(lead.utm_source || 'sem_utm')}<br><span class="muted">${escapeHtml(lead.utm_campaign || 'sem_campanha')}</span></td>
         </tr>
-      `).join('') : '<tr><td colspan="7">Ainda não há leads.</td></tr>';
+      `).join('') : '<tr><td colspan="8">Ainda não há leads.</td></tr>';
 
       $('updatedAt').textContent = `Atualizado em ${dateLabel(data.generated_at || new Date().toISOString())}`;
     }
