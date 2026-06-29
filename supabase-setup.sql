@@ -291,7 +291,25 @@ begin
 
   v_status := case
     when lower(v_event) in ('sale.paid', 'venda aprovada', 'venda_aprovada', 'paid', 'approved') then 'paid'
-    when lower(v_event) in ('sale.pending', 'venda pendente', 'venda_pendente', 'pending') then 'pending'
+    when lower(v_event) in (
+      'sale.pending',
+      'venda pendente',
+      'venda_pendente',
+      'pending',
+      'payment.pending',
+      'payment_pending',
+      'aguardando pagamento',
+      'aguardando_pagamento',
+      'waiting_payment',
+      'pix.generated',
+      'pix_generated',
+      'pix gerado',
+      'pix_gerado',
+      'boleto.generated',
+      'boleto_generated',
+      'boleto gerado',
+      'boleto_gerado'
+    ) then 'pending'
     when lower(v_event) in ('sale.refund', 'sale.refunded', 'reembolso', 'refund', 'refunded') then 'refund'
     else coalesce(nullif(lower(v_event), ''), 'unknown')
   end;
