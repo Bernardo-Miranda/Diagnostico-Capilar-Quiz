@@ -544,9 +544,15 @@ recentes as (
       select 1
       from sales_base s
       where s.sale_status = 'paid'
-        and coalesce(nullif(s.utm_source, ''), 'sem_utm') = coalesce(nullif(b.utm_source, ''), 'sem_utm')
-        and coalesce(nullif(s.utm_campaign, ''), 'sem_campanha') = coalesce(nullif(b.utm_campaign, ''), 'sem_campanha')
-        and s.received_at >= b.created_at - interval '2 hours'
+        and (
+          lower(coalesce(nullif(s.utm_campaign, ''), nullif(s.tracking_campaign_id, ''), '')) = lower(coalesce(nullif(b.utm_campaign, ''), ''))
+          or lower(coalesce(nullif(s.utm_source, ''), '')) = lower(coalesce(nullif(b.utm_source, ''), ''))
+          or lower(coalesce(nullif(s.utm_source, ''), '')) like lower(coalesce(nullif(b.utm_source, ''), '')) || '%'
+          or nullif(s.utm_campaign, '') is null
+          or nullif(b.utm_campaign, '') is null
+        )
+        and s.received_at between coalesce(b.checkout_em, b.concluido_em, b.updated_at, b.created_at) - interval '12 hours'
+          and coalesce(b.checkout_em, b.concluido_em, b.updated_at, b.created_at) + interval '24 hours'
     ) as venda_aprovada,
     coalesce(nullif(b.utm_source, ''), 'sem_utm') as utm_source,
     coalesce(nullif(b.utm_campaign, ''), 'sem_campanha') as utm_campaign,
